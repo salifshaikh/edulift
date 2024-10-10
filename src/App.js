@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@material-ui/core/styles';
+import { CssBaseline } from '@mui/material';
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Home from './components/Home';
@@ -22,6 +24,23 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#3f51b5',
+    },
+    secondary: {
+      main: '#f50057',
+    },
+    background: {
+      default: '#f5f5f5',
+    },
+  },
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+});
+
 function App() {
   const [user, setUser] = useState(null);
 
@@ -34,24 +53,27 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <div className="App">
-        <Navbar user={user} />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route
-            path="/courses"
-            element={
-              <ProtectedRoute user={user}>
-                <Courses />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <div className="App">
+          <Navbar user={user} />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route
+              path="/courses"
+              element={
+                <ProtectedRoute user={user}>
+                  <Courses />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 
