@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, Typography, Card, CardContent, CardActions, Button, Grid } from '@mui/material';
 
 const scholarships = [
-  { id: 1, title: 'STEM Excellence Scholarship', deadline: '2023-12-31', amount: '$5000' },
+  { id: 1, title: 'STEM Excellence', deadline: '2023-12-31', amount: '$5000' },
   { id: 2, title: 'Future Leaders Grant', deadline: '2023-11-30', amount: '$3000' },
   { id: 3, title: 'Digital Innovation Award', deadline: '2024-01-15', amount: '$4000' },
 ];

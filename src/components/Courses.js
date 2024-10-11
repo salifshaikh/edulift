@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import CoursePlayer from './CoursePlayer';
 
 const youtubeEducationVideos = [
@@ -9,9 +9,6 @@ const youtubeEducationVideos = [
   { title: 'HTML Full Course - Build a Website Tutorial', url: 'https://www.youtube.com/embed/pQN-pnXPaVg' },
   { title: 'CSS Tutorial - Zero to Hero (Complete Course)', url: 'https://www.youtube.com/embed/1Rs2ND1ryYc' },
   { title: 'SQL Tutorial - Full Database Course for Beginners', url: 'https://www.youtube.com/embed/HXV3zeQKqGY' },
-  { title: 'Machine Learning for Everybody – Full Course', url: 'https://www.youtube.com/embed/i_LwzRVP7bg' },
-  { title: 'Data Structures and Algorithms in Python - Full Course for Beginners', url: 'https://www.youtube.com/embed/pkYVOmU3MgA' },
-  { title: 'Git and GitHub for Beginners - Crash Course', url: 'https://www.youtube.com/embed/RGOj5yH7evk' },
 ];
 
 const getYouTubeVideoId = (url) => {
@@ -21,7 +18,7 @@ const getYouTubeVideoId = (url) => {
 
 const getYouTubeThumbnail = (videoUrl) => {
   const videoId = getYouTubeVideoId(videoUrl);
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 };
 
 const Courses = () => {
@@ -34,25 +31,20 @@ const Courses = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=6');
         if (!response.ok) {
           throw new Error('Failed to fetch courses');
         }
         const data = await response.json();
-        const formattedCourses = data.slice(0, 6).map((post, index) => {
-          const mainVideo = youtubeEducationVideos[index % youtubeEducationVideos.length];
-          const randomVideos = [...youtubeEducationVideos].sort(() => 0.5 - Math.random()).slice(0, 3);
+        const formattedCourses = data.map((post, index) => {
+          const video = youtubeEducationVideos[index % youtubeEducationVideos.length];
           return {
             id: post.id,
-            title: mainVideo.title,
+            title: video.title,
             description: post.body.slice(0, 100) + '...',
             instructor: 'Instructor Name',
-            thumbnail: getYouTubeThumbnail(mainVideo.url),
-            lessons: randomVideos.map((video, idx) => ({
-              id: idx + 1,
-              title: `Lesson ${idx + 1}: ${video.title}`,
-              videoUrl: video.url,
-            })),
+            thumbnail: getYouTubeThumbnail(video.url),
+            videoUrl: video.url,
           };
         });
         setCourses(formattedCourses);
@@ -75,55 +67,58 @@ const Courses = () => {
   );
 
   if (loading) {
-    return <div className="text-center">Loading courses...</div>;
+    return <div className="text-center py-10 text-xl">Loading courses...</div>;
   }
 
   if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+    return <div className="text-center py-10 text-xl text-red-500">{error}</div>;
   }
 
   return (
-    <div className="w-full p-6">
-      <h2 className="mb-6 text-3xl font-bold text-gray-800 dark:text-white">Available Courses</h2>
-
-      {/* Search Bar */}
+    <div className="container mx-auto px-4 py-8">
+      <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-8">Explore Our Courses</h2>
+      
       <input
         type="text"
         placeholder="Search courses..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="mb-6 w-full rounded-md border border-gray-300 p-2 text-gray-800 dark:bg-[#2C303B] dark:text-white"
+        className="w-full max-w-md mx-auto block px-4 py-2 mb-8 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600"
       />
 
-      {/* Courses Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredCourses.length > 0 ? (
-          filteredCourses.map((course) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AnimatePresence>
+          {filteredCourses.map((course) => (
             <motion.div
               key={course.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="cursor-pointer overflow-hidden rounded-lg bg-white shadow-lg transition-transform hover:scale-105 dark:bg-[#2C303B]"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl transform hover:scale-105"
               onClick={() => handleCourseClick(course)}
             >
-              <img src={course.thumbnail} alt={course.title} className="h-48 w-full object-cover" />
+              <img src={course.thumbnail} alt={course.title} className="w-full h-48 object-cover" />
               <div className="p-4">
-                <h3 className="mb-2 text-xl font-semibold text-gray-800 dark:text-white">{course.title}</h3>
-                <p className="mb-2 text-sm text-gray-600 dark:text-gray-300">{course.description}</p>
-                <p className="text-sm font-medium text-primary">Instructor: {course.instructor}</p>
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">{course.title}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">{course.description}</p>
+                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Instructor: {course.instructor}</p>
               </div>
             </motion.div>
-          ))
-        ) : (
-          <p className="text-center text-gray-800 dark:text-white">No courses found.</p>
-        )}
+          ))}
+        </AnimatePresence>
       </div>
 
-      {/* Course Player Modal */}
-      {selectedCourse && (
-        <CoursePlayer course={selectedCourse} onClose={() => setSelectedCourse(null)} />
+      {filteredCourses.length === 0 && (
+        <p className="text-center text-gray-600 dark:text-gray-400 mt-8">No courses found.</p>
       )}
+
+      <AnimatePresence>
+        {selectedCourse && (
+          <CoursePlayer key="modal" course={selectedCourse} onClose={() => setSelectedCourse(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
