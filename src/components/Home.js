@@ -1,13 +1,29 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Typography, Button, Grid } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Container, Typography, Button, Grid } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-const useStyles = makeStyles((theme) => ({
-  heroContent: {
-    backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(8, 0, 6),
-  },
+const HeroSection = styled('div')({
+  position: 'relative',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '100vh',
+  overflow: 'hidden',
+});
+
+const BackgroundVideo = styled('video')({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  zIndex: -1,
+  opacity: 0.7,
+});
+
+const useStyles = styled((theme) => ({
   heroButtons: {
     marginTop: theme.spacing(4),
   },
@@ -17,9 +33,19 @@ function Home() {
   const classes = useStyles();
 
   return (
-    <div className={classes.heroContent}>
+    <HeroSection>
+      <BackgroundVideo autoPlay muted loop>
+        <source src="/path-to-your-video.mp4" type="video/mp4" />
+      </BackgroundVideo>
       <Container maxWidth="sm">
-        <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
+        <Typography 
+          component="h1" 
+          variant="h2" 
+          align="center" 
+          color="textPrimary" 
+          gutterBottom 
+          className="animate__animated animate__fadeInDown"
+        >
           Welcome to EduLift
         </Typography>
         <Typography variant="h5" align="center" color="textSecondary" paragraph>
@@ -40,7 +66,7 @@ function Home() {
           </Grid>
         </div>
       </Container>
-    </div>
+    </HeroSection>
   );
 }
 

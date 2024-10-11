@@ -1,23 +1,9 @@
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { getAuth, signOut } from "firebase/auth";
-import { AppBar, Toolbar, Typography, Button, makeStyles } from '@material-ui/core';
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  title: {
-    flexGrow: 1,
-  },
-  link: {
-    color: 'white',
-    textDecoration: 'none',
-  },
-}));
 
 function Navbar({ user }) {
-  const classes = useStyles();
   const auth = getAuth();
 
   const handleLogout = () => {
@@ -25,34 +11,28 @@ function Navbar({ user }) {
   };
 
   return (
-    <div className={classes.root}>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            <RouterLink to="/" className={classes.link}>
-              EduLift
-            </RouterLink>
-          </Typography>
-          <Button color="inherit" component={RouterLink} to="/courses">
-            Courses
-          </Button>
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}>
+          EduLift
+        </Typography>
+        <Box>
           {user ? (
-            <Button color="inherit" onClick={handleLogout}>
-              Logout
-            </Button>
+            <>
+              <Button color="inherit" component={Link} to="/courses">Courses</Button>
+              <Button color="inherit" component={Link} to="/resources">Resources</Button>
+              <Button color="inherit" component={Link} to="/scholarships">Scholarships</Button>
+              <Button color="inherit" onClick={handleLogout}>Logout</Button>
+            </>
           ) : (
             <>
-              <Button color="inherit" component={RouterLink} to="/login">
-                Login
-              </Button>
-              <Button color="inherit" component={RouterLink} to="/signup">
-                Sign Up
-              </Button>
+              <Button color="inherit" component={Link} to="/login">Login</Button>
+              <Button color="inherit" component={Link} to="/signup">Sign Up</Button>
             </>
           )}
-        </Toolbar>
-      </AppBar>
-    </div>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }
 

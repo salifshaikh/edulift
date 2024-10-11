@@ -1,58 +1,36 @@
 import React, { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { Container, Button, TextField, Typography, Box, Grid } from '@mui/material';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useNavigate } from 'react-router-dom';
-import { Button, TextField, Typography, Container, Grid, Divider } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import GoogleIcon from '@material-ui/icons/Android';
-
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%',
-    marginTop: theme.spacing(3),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  googleButton: {
-    marginTop: theme.spacing(2),
-  },
-  divider: {
-    margin: theme.spacing(3, 0),
-  },
-}));
 
 function SignUp() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [dob, setDob] = useState('');
+  const [city, setCity] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const auth = getAuth();
-  const classes = useStyles();
+  const db = getFirestore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigate('/courses');
-    } catch (error) {
-      setError(error.message);
-    }
-  };
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Save additional user information to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        name,
+        email,
+        phoneNumber,
+        dob,
+        city
+      });
 
-  const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
       navigate('/courses');
     } catch (error) {
       setError(error.message);
@@ -60,64 +38,96 @@ function SignUp() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <div className={classes.paper}>
+    <Container maxWidth="xs">
+      <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography component="h1" variant="h5">
           Sign Up
         </Typography>
         {error && <Typography color="error">{error}</Typography>}
-        <form className={classes.form} onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </Grid>
-          </Grid>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="name"
+            label="Full Name"
+            name="name"
+            autoFocus
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="phoneNumber"
+            label="Phone Number"
+            name="phoneNumber"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="dob"
+            label="Date of Birth"
+            name="dob"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={dob}
+            onChange={(e) => setDob(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="city"
+            label="City"
+            name="city"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            color="primary"
-            className={classes.submit}
+            sx={{ mt: 3, mb: 2 }}
           >
             Sign Up
           </Button>
-        </form>
-        <Divider className={classes.divider} />
-        <Button
-          fullWidth
-          variant="outlined"
-          color="primary"
-          className={classes.googleButton}
-          startIcon={<GoogleIcon />}
-          onClick={handleGoogleSignIn}
-        >
-          Sign Up with Google
-        </Button>
-      </div>
+          <Grid container justifyContent="flex-end">
+            <Grid item>
+              <Button variant="text" onClick={() => navigate('/login')}>
+                Already have an account? Login
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
     </Container>
   );
 }
